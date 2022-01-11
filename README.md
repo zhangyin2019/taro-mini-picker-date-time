@@ -7,6 +7,20 @@
 ```javascript
 components: {
   ...,
-  PickerDateTime: () => import('@/Common/picker-date-time'),    
+  PickerDateTime: () => import('xxx/picker-date-time'),
 },
+```
+
+* 使用的地方
+```javascript
+<PickerDateTime
+  :text="xxx"
+  :minDateTime="xxx"
+  :maxDateTime="xxx"
+  @handleConfirm="
+    (v) => {
+      // TODO 选完以后的操作
+    }
+  "
+/>
 ```
