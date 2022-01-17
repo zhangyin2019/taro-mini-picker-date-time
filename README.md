@@ -24,6 +24,6 @@ components: {
   "
 />
 ```
-* 效果
+### 效果
 
 ![image](https://user-images.githubusercontent.com/49790909/149069071-2cecc23d-65c2-4917-9842-79e5ab661567.png)
