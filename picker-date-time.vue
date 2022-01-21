@@ -6,7 +6,12 @@
           ? 'pos_abs l_0 t_0 w_100_per h_100_per dis_flex opa_0'
           : 'flex_1'
       }`"
-      @tap="isOpened = !isOpened"
+      @tap="
+        () => {
+          if (disabled) return;
+          isOpened = !isOpened;
+        }
+      "
       >{{ text || '请选择' }}</view
     >
 
@@ -46,7 +51,7 @@
           <view
             v-for="(item, index) in selector[0]"
             :key="index"
-            class="h_64 dis_flex ju_con_cen ali_it_cen font_28"
+            class="h_64 dis_flex ju_con_cen ali_it_cen font_30"
             >{{ item }}</view
           >
         </picker-view-column>
@@ -55,7 +60,7 @@
           <view
             v-for="(item, index) in selector[1]"
             :key="index"
-            class="h_64 dis_flex ju_con_cen ali_it_cen font_28"
+            class="h_64 dis_flex ju_con_cen ali_it_cen font_30"
             >{{ item }}</view
           >
         </picker-view-column>
@@ -93,6 +98,12 @@ export default {
       default: () => false,
     },
 
+    // 时间间隔（分钟）
+    timeSlot: {
+      type: Number,
+      default: () => 15,
+    },
+
     // 最小日期时间
     minDateTime: {
       type: String,
@@ -113,6 +124,21 @@ export default {
       eg: 'HH:mm',
       default: () => '',
     },
+
+    // 指定固定分
+    constMinute: {
+      type: String,
+      eg: 'mm',
+      default: () => '',
+    },
+
+    // 是否禁用
+    disabled: {
+      type: Boolean,
+      default: () => false,
+    },
+
+    //
   },
   data() {
     return {
@@ -200,7 +226,7 @@ export default {
         diffdate[i] = stime;
 
         //获取开始日期时间戳
-        let stime_ts = new Date(stime.replace(/-/g, '/')).getTime();
+        let stime_ts = global.commonFunc.getDateWithStable(stime).getTime();
 
         //增加一天时间戳后的日期
         let next_date = stime_ts + 24 * 60 * 60 * 1000;
@@ -227,14 +253,14 @@ export default {
 
     // 初始化
     init() {
-      let startTime = moment().add('-1', 'year').format('YYYY-MM-DD');// 开始日期
+      let startTime = moment().add('-1', 'year').format('YYYY-MM-DD'); // 开始日期
       let endTime = moment().add('1', 'year').format('YYYY-MM-DD'); // 结束日期
 
       const minDateTime = this.$props.minDateTime
-        ? new Date(this.$props.minDateTime.replace(/-/g, '-'))
+        ? global.commonFunc.getDateWithStable(this.$props.minDateTime)
         : null;
       const maxDateTime = this.$props.maxDateTime
-        ? new Date(this.$props.maxDateTime.replace(/-/g, '-'))
+        ? global.commonFunc.getDateWithStable(this.$props.maxDateTime)
         : null;
 
       if (minDateTime && !maxDateTime) {
@@ -256,16 +282,43 @@ export default {
 
       this.selector = [
         dateArr,
-        this.getTimeSlot(15).filter((item) => {
+        this.getTimeSlot(this.$props.timeSlot).filter((item) => {
           if (this.$props.constHourMinute) {
             return item == this.$props.constHourMinute;
+          } else if (this.$props.constMinute) {
+            return (
+              (!this.$props.minDateTime ||
+                (this.$props.minDateTime &&
+                  moment(
+                    global.commonFunc.getDateWithStable(
+                      `${dateArr[this.value[0]]} ${item}`
+                    )
+                  ).diff(minDateTime) >= 0)) &&
+              (!this.$props.maxDateTime ||
+                (this.$props.maxDateTime &&
+                  moment(
+                    global.commonFunc.getDateWithStable(
+                      `${dateArr[this.value[0]]} ${item}`
+                    )
+                  ).diff(maxDateTime) <= 0)) &&
+              item.substr(3) == this.$props.constMinute
+            );
           } else {
             return (
-              !this.$props.minDateTime ||
-              (this.$props.minDateTime &&
-                moment(new Date(`${dateArr[this.value[0]]} ${item}`)).diff(
-                  minDateTime
-                ) >= 0)
+              (!this.$props.minDateTime ||
+                (this.$props.minDateTime &&
+                  moment(
+                    global.commonFunc.getDateWithStable(
+                      `${dateArr[this.value[0]]} ${item}`
+                    )
+                  ).diff(minDateTime) >= 0)) &&
+              (!this.$props.maxDateTime ||
+                (this.$props.maxDateTime &&
+                  moment(
+                    global.commonFunc.getDateWithStable(
+                      `${dateArr[this.value[0]]} ${item}`
+                    )
+                  ).diff(maxDateTime) <= 0))
             );
           }
 
