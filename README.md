@@ -15,6 +15,7 @@ components: {
 ```javascript
 <PickerDateTime
   :text="xxx"
+  :timeSlot="xxx"
   :minDateTime="xxx"
   :maxDateTime="xxx"
   @handleConfirm="
